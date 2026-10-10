@@ -40,7 +40,8 @@
   },
   "scripts": {
     "test": "node test/culprit.test.mjs",
-    "test:host": "node test/host-dispatch.mjs"
+    "test:host": "node test/host-dispatch.mjs",
+    "test:profile": "node test/profile-install.mjs"
   },
   "engines": {
     "node": ">=22"

@@ -59,9 +59,22 @@ plugin_manager(action: "install_bundle", target: "C:\\path\\to\\dsh-culprit")
 
 ### 怎么确认它真的装上了
 
-"装成功"是最容易骗人的一件事。宿主的 `register()` 会做 schema 校验，而它的异常被
-`apply()` 的兜底 try/catch 吞掉了——表现是**日志干净、插件列表里也有、但工具根本不存在**。
-所以别信日志，去问宿主：
+"装成功"是最容易骗人的一件事，而且它有**两层**，得分别去问。
+
+**第一层：profile 里到底有没有它。** 加载不成功的 bundle 会被**静默跳过**，
+表现是"重启后一切正常，只是没有这个工具"：
+
+```
+node test/profile-install.mjs
+```
+
+它用**宿主自己的 profile 解析器**解析 profile，逐项检查 `dependencies` 里的 `link:`、
+`dsh.profile.bundles` 有没有选中它（**漏了这步，插件自己的 patch 根本不会被读**）、
+`node_modules` 里的 junction 通不通、解析出来的 patch 载荷里有没有那条 insert 行。
+它只**读** profile，不启动应用，所以对正在运行的应用是安全的。
+
+**第二层：工具真的注册上了吗。** 宿主的 `register()` 要做 schema 校验，而它的异常被
+`apply()` 的兜底 try/catch 吞掉了——表现同样是**日志干净、插件列表里也有、但工具根本不存在**：
 
 ```
 node test/host-dispatch.mjs
@@ -70,7 +83,8 @@ node test/host-dispatch.mjs
 它起一个真的 cordis 上下文 + 真的 `dsh-tools` 服务，**从 profile 的 node_modules 加载插件**
 （也就是安装后的那一份），走 `app.tools.execute()` 真正派发一次归因，
 并断言返回值对 `output.schema` 零违规、render 真的在真值上跑过、工作树被还回去了。
-找不到宿主 runtime 时它**以退出码 2 明确跳过——跳过不算通过**。
+
+两个脚本在缺宿主 runtime 时都**以退出码 2 明确跳过——跳过不算通过**。
 
 ---
 
@@ -275,7 +289,8 @@ powershell -Command "node skip.mjs; exit $LASTEXITCODE"         exit=125   ← �
 
 ```
 node test/culprit.test.mjs      # 108 条断言，不需要宿主
-node test/host-dispatch.mjs     # 26 条断言，需要宿主 runtime（见"怎么确认它真的装上了"）
+node test/profile-install.mjs   # 10 条断言，只读 profile（见"怎么确认它真的装上了"）
+node test/host-dispatch.mjs     # 26 条断言，需要宿主 runtime（同上）
 ```
 
 第一套全是**真的临时 git 仓库、真的 git、真的子进程**，不用任何测试框架。（`npm test`）重点验证：
@@ -302,12 +317,13 @@ node test/host-dispatch.mjs     # 26 条断言，需要宿主 runtime（见"怎�
 
 ```
 dsh-culprit/
-├─ index.mjs                宿主半边，唯一被加载的文件（不 import 任何 @deepseek-ai/*）
-├─ cordis.patch.yml         挂载声明
-├─ locale/{zh,en}.json      插件列表里的标题与描述
-├─ test/culprit.test.mjs    108 条断言，不依赖宿主
-├─ test/host-dispatch.mjs   26 条断言，挂到真宿主服务上跑真派发
-├─ examples/demo.mjs        临时造仓库的现场演示
+├─ index.mjs                 宿主半边，唯一被加载的文件（不 import 任何 @deepseek-ai/*）
+├─ cordis.patch.yml          挂载声明
+├─ locale/{zh,en}.json       插件列表里的标题与描述
+├─ test/culprit.test.mjs     108 条断言，不依赖宿主
+├─ test/profile-install.mjs  10 条断言，只读 profile，验"装进去了没有"
+├─ test/host-dispatch.mjs    26 条断言，挂到真宿主服务上，验"工具真的注册上了吗"
+├─ examples/demo.mjs         临时造仓库的现场演示
 └─ README.md
 ```
 
