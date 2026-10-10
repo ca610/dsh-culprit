@@ -3,7 +3,23 @@
   "version": "0.1.0",
   "private": true,
   "description": "Regression culprit finder: bisect a failing predicate to the exact commit that broke it, with evidence.",
+  "keywords": [
+    "dsh",
+    "dsh-plugin",
+    "deepseek-harness",
+    "git-bisect",
+    "regression",
+    "debugging"
+  ],
   "license": "MIT",
+  "homepage": "https://github.com/ca610/dsh-culprit#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ca610/dsh-culprit.git"
+  },
+  "bugs": {
+    "url": "https://github.com/ca610/dsh-culprit/issues"
+  },
   "type": "module",
   "main": "./index.mjs",
   "exports": {

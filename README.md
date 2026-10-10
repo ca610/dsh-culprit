@@ -7,6 +7,8 @@
 
 它不是"再跑一遍测试"，是**把测试变红这件事本身当成一个可以追溯的事实**。
 
+**仓库**：[github.com/ca610/dsh-culprit](https://github.com/ca610/dsh-culprit) · MIT
+
 ---
 
 ## 为什么需要它
@@ -24,6 +26,12 @@ dsh-culprit 回答的是另一个问题：**"从哪个提交开始，这个行�
 ---
 
 ## 安装
+
+先拿到代码：
+
+```
+git clone https://github.com/ca610/dsh-culprit
+```
 
 **常规路径**（用户自管 profile）——由 agent 调用插件管理器：
 
