@@ -1,0 +1,4 @@
+{
+  "title": "Regression Culprit",
+  "description": "When something broke, bisect the history with a failing command and get back the exact commit that did it."
+}
